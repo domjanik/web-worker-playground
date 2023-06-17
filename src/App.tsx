@@ -23,28 +23,30 @@ function App() {
 
   const performTestsWithoutWorker = async () => {
       const start = Date.now();
+      let resSum = 0;
       setState(1);
       //setTaskList(await generateTasks(taskAmount));
       const tasks = taskList;
       setState(2);
       for(const taskIndex in tasks) {
-          await tasks[taskIndex].task();
+          const res = await tasks[taskIndex].task();
           console.log("Executed: ", taskIndex);
+          resSum += res;
       }
       setState(3);
       const end = Date.now();
       setTaskExecutionTime(end - start);
+      console.log(resSum);
   }
 
     const performTestsWithWorker = async () => {
-
         async function createWorkerTask(taskId: number, index: number) {
-            return new Promise<void>((resolve, reject) => {
+            return new Promise<number>((resolve, reject) => {
                 const worker = new Worker('./worker.js');
                 worker.postMessage({taskId, index});
                 worker.onmessage = (event: any) => {
                     console.log("Executed: ", event.data.index);
-                    resolve();
+                    resolve(event.data.result);
                 };
                 worker.onerror = (error: any) => {
                     reject(error);
@@ -55,11 +57,12 @@ function App() {
         const start = Date.now();
         setState(1);
         const tasks = taskList.map((task, index) => createWorkerTask(task.type, index));
-        await Promise.all(tasks);
+        const resultArray = await Promise.all(tasks);
         setState(2);
         const end = Date.now();
         setTaskExecutionTime(end - start);
         setState(3);
+        console.log(resultArray.reduce((acc, val) => acc + val, 0));
     }
   const performTests = async () => {
 

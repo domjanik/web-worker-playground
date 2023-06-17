@@ -1,5 +1,6 @@
 function simpleTask() {
     console.log("ST");
+    return 1;
 }
 
 async function timeoutTask() {
@@ -7,6 +8,7 @@ async function timeoutTask() {
     await setTimeout(() => {
         console.log('Done TT');
     }, 100);
+    return 2;
 }
 
 function timeConsumingTask() {
@@ -18,12 +20,14 @@ function timeConsumingTask() {
         n--;
     }
     console.log("TCT Done");
+    return 3;
 }
 
 async function asyncTask() {
     console.log("Starting AT");
     await fetch("https://jsonplaceholder.typicode.com/todos/1");
     console.log("AT Done");
+    return 4
 }
 
 const taskTypes = {
@@ -38,13 +42,13 @@ self.onmessage = (event) => {
     const {task} = taskTypes[taskId];
     const taskRes = task();
     if(taskRes?.then) {
-        taskRes.then(() => {
-            self.postMessage({index});
+        taskRes.then((res) => {
+            self.postMessage({index, result: res });
         }).catch((error) => {
             console.error('Error executing task:', error);
             self.postMessage({index, error: true});
         });
     } else {
-        self.postMessage({index});
+        self.postMessage({index, result: taskRes});
     }
 };

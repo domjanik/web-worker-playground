@@ -1,17 +1,19 @@
-export type TestTask = () => (void | Promise<void>);
+export type TestTask = () => (number | Promise<number>);
 
-function simpleTask(): void {
+function simpleTask(): number {
     console.log("ST");
+    return 1;
 }
 
-async function timeoutTask(): Promise<void> {
+async function timeoutTask(): Promise<number> {
     console.log('Starting TT');
     await setTimeout(() => {
         console.log('Done TT');
     }, 100);
+    return 2;
 }
 
-function timeConsumingTask(): void {
+function timeConsumingTask(): number {
         console.log("Starting TCT");
 
         // emulate time consuming task
@@ -20,12 +22,14 @@ function timeConsumingTask(): void {
             n--;
         }
         console.log("TCT Done");
+        return 3;
 }
 
-async function asyncTask(): Promise<void> {
+async function asyncTask(): Promise<number> {
     console.log("Starting AT");
     await fetch("https://jsonplaceholder.typicode.com/todos/1");
     console.log("AT Done");
+    return 4
 }
 
 export const taskTypes: {[key: number]: {type: number, task: TestTask}} = {
